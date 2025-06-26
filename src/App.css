@@ -1,0 +1,18 @@
+.app {
+  min-height: 100vh;
+  background: white;
+  background-attachment: fixed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
