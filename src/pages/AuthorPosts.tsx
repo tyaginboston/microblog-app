@@ -1,48 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchPostsByUser, fetchUser } from '../services/api';
 import { PostCard } from '../components/PostCard';
 import { Loading } from '../components/Loading';
 import { ErrorMessage } from '../components/ErrorMessage';
-import type { Post, User } from '../types/api';
+import { useStore, useObservable } from '../hooks';
+import { postsStore, usersStore } from '../store';
+import type { Post } from '../types/api';
 import './AuthorPosts.css';
 
 export function AuthorPosts() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [author, setAuthor] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Using RxJS stores for posts and user data
+  const { posts, loading: postsLoading, error: postsError } = useStore(postsStore);
+  const { loading: userLoading, error: userError } = useStore(usersStore);
+  
+  // Get specific user data using RxJS observable
+  const author = useObservable(
+    usersStore.getUser$(parseInt(userId || '0')),
+    null
+  );
 
   useEffect(() => {
     if (userId) {
-      loadAuthorData(parseInt(userId));
+      const authorId = parseInt(userId);
+      // Load posts by user and user details using RxJS actions
+      postsStore.loadPostsByUser(authorId);
+      usersStore.loadUser(authorId);
     }
   }, [userId]);
-
-  const loadAuthorData = async (authorId: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [postsData, authorData] = await Promise.all([
-        fetchPostsByUser(authorId),
-        fetchUser(authorId)
-      ]);
-
-      setPosts(postsData);
-      setAuthor(authorData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load author data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePostClick = (post: Post) => {
     navigate(`/post/${post.id}`);
   };
+
+  const handleRetry = () => {
+    if (userId) {
+      const authorId = parseInt(userId);
+      postsStore.loadPostsByUser(authorId);
+      usersStore.loadUser(authorId);
+    }
+  };
+
+  const loading = postsLoading || userLoading;
+  const error = postsError || userError;
 
   if (loading) {
     return <Loading message="Loading author posts..." />;
@@ -52,7 +54,7 @@ export function AuthorPosts() {
     return (
       <ErrorMessage 
         message={error || 'Author not found'} 
-        onRetry={() => userId && loadAuthorData(parseInt(userId))}
+        onRetry={handleRetry}
       />
     );
   }

@@ -26,6 +26,13 @@
   margin: 0;
 }
 
+.posts-header .subtitle {
+  color: #059669;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
 .posts-grid {
   display: flex;
   flex-direction: column;

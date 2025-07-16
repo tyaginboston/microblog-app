@@ -1,52 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchPost, fetchComments, fetchUser } from '../services/api';
 import { CommentCard } from '../components/CommentCard';
 import { Loading } from '../components/Loading';
 import { ErrorMessage } from '../components/ErrorMessage';
-import type { Post, Comment, User } from '../types/api';
+import { useStore } from '../hooks';
+import { postDetailStore } from '../store';
 import './PostDetail.css';
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [author, setAuthor] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Using RxJS store instead of multiple useState hooks
+  const { post, comments, author, loading, error } = useStore(postDetailStore);
 
   useEffect(() => {
     if (id) {
-      loadPostData(parseInt(id));
+      // Trigger loading post details using RxJS action
+      postDetailStore.loadPostDetail(parseInt(id));
     }
   }, [id]);
-
-  const loadPostData = async (postId: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [postData, commentsData] = await Promise.all([
-        fetchPost(postId),
-        fetchComments(postId)
-      ]);
-
-      setPost(postData);
-      setComments(commentsData);
-
-      const authorData = await fetchUser(postData.userId);
-      setAuthor(authorData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load post');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAuthorClick = () => {
     if (author) {
       navigate(`/author/${author.id}`);
+    }
+  };
+
+  const handleRetry = () => {
+    if (id) {
+      postDetailStore.loadPostDetail(parseInt(id));
     }
   };
 
@@ -58,7 +41,7 @@ export function PostDetail() {
     return (
       <ErrorMessage 
         message={error || 'Post not found'} 
-        onRetry={() => id && loadPostData(parseInt(id))}
+        onRetry={handleRetry}
       />
     );
   }

@@ -1,37 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchPosts } from '../services/api';
 import { PostCard } from '../components/PostCard';
 import { Loading } from '../components/Loading';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { useStore } from '../hooks';
+import { postsStore } from '../store';
 import type { Post } from '../types/api';
 import './PostsList.css';
 
 export function PostsList() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Using RxJS store instead of React useState (replaces Redux useSelector)
+  const { posts, loading, error } = useStore(postsStore);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadPosts();
+    // Trigger loading posts using RxJS action (replaces Redux dispatch)
+    postsStore.loadPosts();
   }, []);
-
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const postsData = await fetchPosts();
-      setPosts(postsData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePostClick = (post: Post) => {
     navigate(`/post/${post.id}`);
+  };
+
+  const handleRetry = () => {
+    // Retry loading posts using RxJS action
+    postsStore.loadPosts();
   };
 
   if (loading) {
@@ -39,13 +32,14 @@ export function PostsList() {
   }
 
   if (error) {
-    return <ErrorMessage message={error} onRetry={loadPosts} />;
+    return <ErrorMessage message={error} onRetry={handleRetry} />;
   }
 
   return (
     <div className="posts-list-container">
       <header className="posts-header">
         <h1>Kubecost Microblog</h1>
+        <p className="subtitle">Now powered by RxJS state management!</p>
       </header>
       <main className="posts-grid">
         {posts.map((post) => (
