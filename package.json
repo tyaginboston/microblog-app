@@ -1,14 +1,31 @@
 {
-  "name": "kubecost",
-  "private": true,
-  "version": "0.0.0",
+  "name": "microblog-app",
+  "version": "1.0.0",
+  "description": "A modern microblog application built with React, TypeScript, and Vite. Features posts, comments, and author pages using JSONPlaceholder API.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && vite build --config vite.pages.config.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tyaginboston/microblog-app.git"
+  },
+  "homepage": "https://tyaginboston.github.io/microblog-app/",
+  "keywords": [
+    "react",
+    "typescript",
+    "microblog",
+    "vite",
+    "react-router",
+    "jsonplaceholder",
+    "portfolio"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
