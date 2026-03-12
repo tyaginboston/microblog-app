@@ -45,7 +45,7 @@ export function PostsList() {
   return (
     <div className="posts-list-container">
       <header className="posts-header">
-        <h1>Kubecost Microblog</h1>
+        <h1>Microblog</h1>
       </header>
       <main className="posts-grid">
         {posts.map((post) => (
