@@ -6,7 +6,7 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/microblog-app">
       <div className="app">
         <Routes>
           <Route path="/" element={<PostsList />} />
